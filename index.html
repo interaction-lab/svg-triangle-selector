@@ -1,0 +1,114 @@
+<html>
+  <head>
+    <style>
+      text {
+        text-anchor: middle;
+      }
+      path {
+        stroke: black;
+        stroke-width: 3;
+        fill: none;
+      }
+      circle:hover {
+        stroke: #666;
+        fill: #666;
+        cursor: pointer;
+      }
+      circle:hover + text {
+        fill: #666;
+      }
+    </style>
+    <script>
+      function setupSvg()
+      {
+        // T elements
+        var tes = [
+          $('#t0'),
+          $('#t1'),
+          $('#t2')
+        ];
+
+        // Ts
+        var ts = tes.map(function(te) {
+          return {
+            x: +te.attr('cx'),
+            y: +te.attr('cy')
+          }
+        });
+
+        // Some helpers
+        var zip = function(_0s, _1s) {
+          var ret = [];
+          var i = 0;
+          for(; i < Math.min(_0s.length, _1s.length); ++i) ret.push([_0s[i], _1s[i]]);
+          for(var r = i; r < _0s.length; ++i) ret.push([_0s[r], undefined]);
+          for(var r = i; r < _1s.length; ++i) ret.push([undefined, _1s[r]]);
+          return ret;
+        };
+
+        var add = function(a, b) { return a + b; };
+        var add2 = function(v0, v1) {
+          return {
+            x: v0.x + v1.x,
+            y: v0.y + v1.y
+          };
+        }
+
+        var mul = function(vector, amount) {
+          return {
+            x: vector.x * amount,
+            y: vector.y * amount
+          }
+        };
+
+        var pointGroup = $('svg').find('g');
+        var circles = pointGroup.children('circle');
+        circles.each(function() {
+          var amts = [
+            +$(this).attr('t0'),
+            +$(this).attr('t1'),
+            +$(this).attr('t2')
+          ];
+
+          var mag = amts.map(function(a) { return a; }).reduce(add, 0);
+          var normalized = amts.map(function(a) { return a / mag; });
+
+          var pulls = zip(ts, normalized).map(function(a) { return mul(a[0], a[1]); });
+          var p = pulls.reduce(add2, {x: 0, y: 0});
+
+          $(this).attr('cx', p.x);
+          $(this).attr('cy', p.y);
+          $(this).attr('r', 10);
+
+          var sel = 'text[pair="' + $(this).attr('id') + '"]';
+
+          var text = pointGroup.children(sel);
+          text.attr('x', p.x + 30);
+          text.attr('y', p.y + 5);
+        });
+
+        circles.click(function() {
+          console.log($(this).attr('bind'));
+        });
+      }
+    </script>
+  </head>
+  <body onload="setupSvg()">
+    <svg width="400" height="300">
+      <text x="200" y="40">Social Dynamics</text>
+      <text x="100" y="270">Long-Term Adaptation</text>
+      <text x="300" y="270">Embodiment</text>
+      <circle id="t0" cx="200" cy="50" r="1"/>
+      <circle id="t2" cx="100" cy="250" r="1"/>
+      <circle id="t1" cx="300" cy="250" r="1"/>
+      <path d="M 200 50 L 300 250 L 100 250 L 200 50 z" />
+
+      <g>
+        <circle id="p1" t0="1.0" t1="0" t2="1.0" bind="asd" />
+        <text pair="p1">Test</text>
+      </g>
+    </svg>
+
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+  </body>
+</html>
